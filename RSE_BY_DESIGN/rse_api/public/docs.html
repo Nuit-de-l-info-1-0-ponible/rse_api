@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Eco Checker API - Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        header .version {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.9em;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 800px;
+        }
+        
+        .sidebar {
+            background: #f8f9fa;
+            padding: 30px;
+            border-right: 1px solid #e9ecef;
+        }
+        
+        .sidebar nav ul {
+            list-style: none;
+        }
+        
+        .sidebar nav li {
+            margin-bottom: 15px;
+        }
+        
+        .sidebar nav a {
+            text-decoration: none;
+            color: #495057;
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: block;
+            transition: all 0.3s;
+        }
+        
+        .sidebar nav a:hover {
+            background: #e9ecef;
+            color: #667eea;
+        }
+        
+        .sidebar nav a.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .main-content {
+            padding: 40px;
+        }
+        
+        .endpoint {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .get { background: #61affe; color: white; }
+        .post { background: #49cc90; color: white; }
+        .delete { background: #f93e3e; color: white; }
+        
+        .url {
+            font-family: 'Courier New', monospace;
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        .test-area {
+            background: #fff8e1;
+            border: 2px solid #ffd54f;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+        
+        .test-form {
+            display: grid;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        input, select, button {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #5a67d8;
+        }
+        
+        .result {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .result pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .try-button {
+            background: #48bb78;
+            margin-top: 10px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .response-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .response-table th, .response-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .response-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌱 Eco Checker API</h1>
+            <p>Documentation complète de l'API</p>
+            <div class="version">Version 1.0.0</div>
+        </header>
+        
+        <div class="content">
+            <aside class="sidebar">
+                <nav>
+                    <ul>
+                        <li><a href="#introduction" class="active">📋 Introduction</a></li>
+                        <li><a href="#getting-started">🚀 Premier pas</a></li>
+                        <li><a href="#endpoints">🔌 Endpoints</a></li>
+                        <li><a href="#check-endpoint">🔍 /check</a></li>
+                        <li><a href="#banner-endpoint">🎨 /banner</a></li>
+                        <li><a href="#health-endpoint">🏥 /health</a></li>
+                        <li><a href="#testing">🧪 Tester l'API</a></li>
+                        <li><a href="#examples">💡 Exemples</a></li>
+                        <li><a href="#errors">❌ Gestion des erreurs</a></li>
+                    </ul>
+                </nav>
+            </aside>
+            
+            <main class="main-content">
+                <section id="introduction">
+                    <h2>📋 Introduction</h2>
+                    <p>L'<strong>Eco Checker API</strong> est une API RESTful qui permet de vérifier l'éco-responsabilité des sites web en analysant leur empreinte carbone et la nature de leur hébergement.</p>
+                    
+                    <div class="test-area">
+                        <h3>🎯 Test rapide</h3>
+                        <div class="test-form">
+                            <input type="text" id="testUrl" placeholder="https://example.com" value="https://google.com">
+                            <button onclick="testQuickCheck()" class="try-button">🔍 Tester maintenant</button>
+                        </div>
+                        <div id="quickResult" class="result"></div>
+                    </div>
+                </section>
+                
+                <section id="endpoints">
+                    <h2>🔌 Endpoints disponibles</h2>
+                    
+                    <div class="endpoint">
+                        <span class="method get">GET</span>
+                        <strong>/api/v1/check</strong>
+                        <p>Analyse complète d'un site web</p>
+                        <div class="url">http://localhost:8000/api/v1/check?url=https://example.com</div>
+                        <button onclick="scrollToSection('check-endpoint')" class="try-button">Voir détails</button>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <span class="method get">GET</span>
+                        <strong>/api/v1/banner/{url}</strong>
+                        <p>Données pour le bandeau d'information</p>
+                        <div class="url">http://localhost:8000/api/v1/banner/https://example.com?style=detailed</div>
+                        <button onclick="scrollToSection('banner-endpoint')" class="try-button">Voir détails</button>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <span class="method get">GET</span>
+                        <strong>/api/v1/health</strong>
+                        <p>Vérifie la santé de l'API</p>
+                        <div class="url">http://localhost:8000/api/v1/health</div>
+                        <button onclick="testEndpoint('/api/v1/health')" class="try-button">Tester</button>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <span class="method delete">DELETE</span>
+                        <strong>/api/v1/cache</strong>
+                        <p>Vide le cache interne</p>
+                        <div class="url">http://localhost:8000/api/v1/cache</div>
+                        <button onclick="testEndpoint('/api/v1/cache', 'DELETE')" class="try-button">Tester</button>
+                    </div>
+                </section>
+                
+                <section id="check-endpoint">
+                    <h2>🔍 Endpoint /check</h2>
+                    <p>Analyse complète d'un site web et retourne un score d'éco-responsabilité.</p>
+                    
+                    <h3>Paramètres</h3>
+                    <table class="response-table">
+                        <tr>
+                            <th>Paramètre</th>
+                            <th>Type</th>
+                            <th>Obligatoire</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>url</td>
+                            <td>string</td>
+                            <td>✅ Oui</td>
+                            <td>URL du site à analyser</td>
+                        </tr>
+                        <tr>
+                            <td>use_cache</td>
+                            <td>boolean</td>
+                            <td>❌ Non (défaut: true)</td>
+                            <td>Utiliser le cache</td>
+                        </tr>
+                        <tr>
+                            <td>include_details</td>
+                            <td>boolean</td>
+                            <td>❌ Non (défaut: true)</td>
+                            <td>Inclure les détails techniques</td>
+                        </tr>
+                    </table>
+                    
+                    <div class="test-area">
+                        <h3>🧪 Tester cet endpoint</h3>
+                        <div class="test-form">
+                            <input type="text" id="checkUrl" placeholder="https://example.com" value="https://github.com">
+                            <label>
+                                <input type="checkbox" id="useCache" checked> Utiliser le cache
+                            </label>
+                            <label>
+                                <input type="checkbox" id="includeDetails" checked> Inclure les détails
+                            </label>
+                            <button onclick="testCheckEndpoint()">🔍 Analyser</button>
+                        </div>
+                        <div id="checkResult" class="result"></div>
+                    </div>
+                </section>
+                
+                <section id="examples">
+                    <h2>💡 Exemples d'utilisation</h2>
+                    
+                    <h3>JavaScript (fetch)</h3>
+                    <div class="url">
+                        <pre><code>// Récupérer les données d'un site
+async function checkWebsite(url) {
+    const response = await fetch(
+        `http://localhost:8000/api/v1/check?url=${encodeURIComponent(url)}`
+    );
+    return await response.json();
+}
+
+// Utilisation
+checkWebsite('https://example.com')
+    .then(data => {
+        console.log('Score:', data.data.score);
+        console.log('Niveau:', data.data.ecoLevel);
+    });</code></pre>
+                    </div>
+                    
+                    <h3>Python (requests)</h3>
+                    <div class="url">
+                        <pre><code>import requests
+
+def check_website(url):
+    response = requests.get(
+        'http://localhost:8000/api/v1/check',
+        params={'url': url}
+    )
+    return response.json()
+
+# Utilisation
+result = check_website('https://example.com')
+print(f"Score: {result['data']['score']}/100")</code></pre>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        // Fonctions de test
+        async function testEndpoint(endpoint, method = 'GET') {
+            const url = endpoint;
+            const resultDiv = document.getElementById('quickResult');
+            resultDiv.innerHTML = '<p>⏳ En cours...</p>';
+            resultDiv.classList.add('show');
+            
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+                
+                const response = await fetch(url, options);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <h4>✅ Réponse (${response.status})</h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h4>❌ Erreur</h4>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        }
+        
+        async function testCheckEndpoint() {
+            const url = document.getElementById('checkUrl').value;
+            const useCache = document.getElementById('useCache').checked;
+            const includeDetails = document.getElementById('includeDetails').checked;
+            const resultDiv = document.getElementById('checkResult');
+            
+            resultDiv.innerHTML = '<p>⏳ Analyse en cours...</p>';
+            resultDiv.classList.add('show');
+            
+            try {
+                const apiUrl = `/api/v1/check?url=${encodeURIComponent(url)}&use_cache=${useCache}&include_details=${includeDetails}`;
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <h4>✅ Site analysé: ${data.data.url}</h4>
+                        <div style="background: ${data.data.banner.color}; color: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                            <strong>${data.data.banner.message}</strong>
+                            <div style="font-size: 2em; text-align: center; margin: 10px 0;">
+                                ${data.data.score}/100
+                            </div>
+                            <div>Niveau: ${data.data.ecoLevel}</div>
+                        </div>
+                        <details>
+                            <summary>📊 Voir les détails complets</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <h4>❌ Erreur</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h4>❌ Erreur réseau</h4>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        }
+        
+        async function testQuickCheck() {
+            const url = document.getElementById('testUrl').value;
+            const resultDiv = document.getElementById('quickResult');
+            
+            resultDiv.innerHTML = '<p>⏳ Chargement...</p>';
+            resultDiv.classList.add('show');
+            
+            try {
+                const response = await fetch(`/api/v1/check?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <h4>✅ Analyse réussie!</h4>
+                        <p><strong>URL:</strong> ${data.data.url}</p>
+                        <p><strong>Score:</strong> ${data.data.score}/100</p>
+                        <p><strong>Niveau:</strong> ${data.data.ecoLevel}</p>
+                        <p><strong>Message:</strong> ${data.data.banner.message}</p>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p>❌ Erreur: ${error.message}</p>`;
+            }
+        }
+        
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+        
+        // Navigation dans la sidebar
+        document.querySelectorAll('.sidebar nav a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Retirer la classe active de tous les liens
+                document.querySelectorAll('.sidebar nav a').forEach(l => {
+                    l.classList.remove('active');
+                });
+                
+                // Ajouter la classe active au lien cliqué
+                this.classList.add('active');
+                
+                // Scroll vers la section
+                const sectionId = this.getAttribute('href').substring(1);
+                scrollToSection(sectionId);
+            });
+        });
+    </script>
+</body>
+</html>

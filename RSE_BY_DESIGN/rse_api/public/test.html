@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSE BY DESIGN API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .api-status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .online { background: #d4edda; color: #155724; }
+        .offline { background: #f8d7da; color: #721c24; }
+        
+        .test-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .test-form {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        input, select, button {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .results {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .results.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .score-display {
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .banner-preview {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 20px 0;
+        }
+        
+        .tab-container {
+            display: flex;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .method-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .get { background: #61affe; color: white; }
+        .post { background: #49cc90; color: white; }
+        
+        .test-cases {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .test-case {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .test-case:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>RSE BY DESIGN API</h1>
+            <p>Interface de test pour l'API</p>
+            <div id="status" class="api-status">Vérification...</div>
+        </header>
+        
+        <div class="test-section">
+            <h2>🔌 Tester les endpoints</h2>
+            
+            <div class="tab-container">
+                <div class="tab active" onclick="switchTab('check')">🔍 /Vérifier</div>
+                <div class="tab" onclick="switchTab('banner')">🎨 /bannière</div>
+                <div class="tab" onclick="switchTab('health')">🏥 /santé</div>
+                <div class="tab" onclick="switchTab('code')">💻Exemples de code</div>
+            </div>
+            
+            <!-- Tab 1: /check -->
+            <div id="tab-check" class="tab-content active">
+                <div class="test-form">
+                    <input type="text" id="checkUrl" placeholder="https://example.com" value="https://github.com">
+                    
+                    <div style="display: flex; gap: 20px;">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="useCache" checked>
+                            <span>Utiliser le cache</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="includeDetails" checked>
+                            <span>Inclure les détails</span>
+                        </label>
+                    </div>
+                    
+                    <button onclick="testCheckEndpoint()">
+                        <span class="method-badge get">GET</span>
+                        Tester /check
+                    </button>
+                </div>
+                
+                <h3 style="margin-top: 30px;">🚀 Exemples rapides</h3>
+                <div class="test-cases">
+                    <div class="test-case" onclick="quickTest('https://google.com')">Google</div>
+                    <div class="test-case" onclick="quickTest('https://github.com')">GitHub</div>
+                    <div class="test-case" onclick="quickTest('https://stackoverflow.com')">StackOverflow</div>
+                    <div class="test-case" onclick="quickTest('https://wikipedia.org')">Wikipedia</div>
+                    <div class="test-case" onclick="quickTest('https://www.ecologie.gouv.fr')">Écologie FR</div>
+                    <div class="test-case" onclick="quickTest('https://numihfrance.fr/')">Numih France</div>
+                </div>
+            </div>
+            
+            <!-- Tab 2: /banner -->
+            <div id="tab-banner" class="tab-content">
+                <div class="test-form">
+                    <input type="text" id="bannerUrl" placeholder="https://example.com" value="https://google.com">
+                    
+                    <select id="bannerStyle">
+                        <option value="default">Default</option>
+                        <option value="minimal">Minimale</option>
+                        <option value="detailed">Detaillé</option>
+                    </select>
+                    
+                    <button onclick="testBannerEndpoint()">
+                        <span class="method-badge get">GET</span>
+                        Tester /bannière
+                    </button>
+                </div>
+                
+                <div id="bannerPreview" style="margin-top: 20px;"></div>
+            </div>
+            
+            <!-- Tab 3: /health -->
+            <div id="tab-health" class="tab-content">
+                <div class="test-form">
+                    <button onclick="testHealthEndpoint()">
+                        <span class="method-badge get">GET</span>
+                        Tester /santé
+                    </button>
+                </div>
+                
+                <div id="healthResult" style="margin-top: 20px;"></div>
+            </div>
+            
+            <!-- Tab 4: Code -->
+            <div id="tab-code" class="tab-content">
+                <h3>📝 Exemples d'intégration</h3>
+                
+                <div class="code-block">
+                    <pre><code>// Intégration JavaScript
+const EcoChecker = {
+    apiBase: 'http://localhost:8000',
+    
+    async check(url) {
+        const response = await fetch(
+            `${this.apiBase}/check?url=${encodeURIComponent(url)}`
+        );
+        return await response.json();
+    },
+    
+    async getBanner(url, style = 'default') {
+        const response = await fetch(
+            `${this.apiBase}/banner/${encodeURIComponent(url)}?style=${style}`
+        );
+        return await response.json();
+    }
+};
+
+// Utilisation
+EcoChecker.check('https://example.com')
+    .then(result => {
+        console.log('Score:', result.data.score);
+    });</code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <div id="results" class="results">
+            <h2>📊 Résultats</h2>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Vérifier l'état de l'API au chargement
+        async function checkAPIStatus() {
+            const statusEl = document.getElementById('status');
+            
+            try {
+                const response = await fetch('/api/v1/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    statusEl.textContent = `✅ API en ligne (${data.status})`;
+                    statusEl.className = 'api-status online';
+                } else {
+                    statusEl.textContent = '❌ API hors ligne';
+                    statusEl.className = 'api-status offline';
+                }
+            } catch (error) {
+                statusEl.textContent = '❌ Impossible de se connecter à l\'API';
+                statusEl.className = 'api-status offline';
+            }
+        }
+        
+        // Tester /check
+        async function testCheckEndpoint() {
+            const url = document.getElementById('checkUrl').value;
+            const useCache = document.getElementById('useCache').checked;
+            const includeDetails = document.getElementById('includeDetails').checked;
+            
+            showLoading('Analyse en cours...');
+            
+            try {
+                const apiUrl = `/api/v1/check?url=${encodeURIComponent(url)}&use_cache=${useCache}&include_details=${includeDetails}`;
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResults(data.data);
+                } else {
+                    showError(data.error || 'Erreur inconnue');
+                }
+            } catch (error) {
+                showError(`Erreur réseau: ${error.message}`);
+            }
+        }
+        
+        // Test rapide
+        async function quickTest(url) {
+            document.getElementById('checkUrl').value = url;
+            testCheckEndpoint();
+        }
+        
+        // Tester /banner
+        async function testBannerEndpoint() {
+            const url = document.getElementById('bannerUrl').value;
+            const style = document.getElementById('bannerStyle').value;
+            
+            showLoading('Génération du bandeau...');
+            
+            try {
+                const apiUrl = `/api/v1/banner/${encodeURIComponent(url)}?style=${style}`;
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                if (data.success) {
+                    showBannerPreview(data.data);
+                } else {
+                    showError(data.error);
+                }
+            } catch (error) {
+                showError(`Erreur réseau: ${error.message}`);
+            }
+        }
+        
+        // Tester /health
+        async function testHealthEndpoint() {
+            showLoading('Vérification de la santé...');
+            
+            try {
+                const response = await fetch('/api/v1/health');
+                const data = await response.json();
+                
+                const healthResult = document.getElementById('healthResult');
+                healthResult.innerHTML = `
+                    <div style="background: #d4edda; padding: 15px; border-radius: 8px;">
+                        <h4>✅ API en bonne santé</h4>
+                        <pre style="margin-top: 10px;">${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                const healthResult = document.getElementById('healthResult');
+                healthResult.innerHTML = `
+                    <div style="background: #f8d7da; padding: 15px; border-radius: 8px;">
+                        <h4>❌ Erreur</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Afficher les résultats
+        function showResults(data) {
+            const results = document.getElementById('results');
+            const content = document.getElementById('resultContent');
+            
+            const bannerColor = data.banner.color;
+            
+            content.innerHTML = `
+                <div style="margin-bottom: 30px;">
+                    <h3>🌐 Site analysé: ${data.url}</h3>
+                    <div class="score-display" style="color: ${bannerColor}">
+                        ${data.score}/100
+                    </div>
+                    <div style="text-align: center; font-size: 1.2em; margin-bottom: 20px;">
+                        Niveau: <strong>${data.ecoLevel}</strong>
+                    </div>
+                </div>
+                
+                <div class="banner-preview" style="background: ${bannerColor}">
+                    <div>${data.banner.message}</div>
+                    <div><strong>${data.score}/100</strong></div>
+                </div>
+                
+                <div style="margin: 25px 0;">
+                    <h4>💡 Recommandations</h4>
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        ${data.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <details>
+                    <summary>📊 Voir les données complètes</summary>
+                    <div class="code-block">
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                </details>
+                
+                <div style="margin-top: 20px; text-align: center;">
+                    <button onclick="copyToClipboard(JSON.stringify(data, null, 2))">
+                        📋 Copier les données JSON
+                    </button>
+                </div>
+            `;
+            
+            results.classList.add('show');
+            window.scrollTo({
+                top: results.offsetTop - 20,
+                behavior: 'smooth'
+            });
+        }
+        
+        // Afficher l'aperçu du bandeau
+        function showBannerPreview(bannerData) {
+            const preview = document.getElementById('bannerPreview');
+            
+            preview.innerHTML = `
+                <h3>🎨 Aperçu du bandeau</h3>
+                <div class="banner-preview" style="background: ${bannerData.color}">
+                    <div>${bannerData.message}</div>
+                    <div><strong>${bannerData.score}/100</strong></div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h4>Données brutes:</h4>
+                    <div class="code-block">
+                        <pre>${JSON.stringify(bannerData, null, 2)}</pre>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Afficher un message de chargement
+        function showLoading(message) {
+            const results = document.getElementById('results');
+            const content = document.getElementById('resultContent');
+            
+            content.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 2em;">⏳</div>
+                    <h3>${message}</h3>
+                </div>
+            `;
+            
+            results.classList.add('show');
+            window.scrollTo({
+                top: results.offsetTop - 20,
+                behavior: 'smooth'
+            });
+        }
+        
+        // Afficher une erreur
+        function showError(message) {
+            const results = document.getElementById('results');
+            const content = document.getElementById('resultContent');
+            
+            content.innerHTML = `
+                <div style="background: #f8d7da; color: #721c24; padding: 20px; border-radius: 8px;">
+                    <h3>❌ Erreur</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+            
+            results.classList.add('show');
+        }
+        
+        // Changer d'onglet
+        function switchTab(tabName) {
+            // Cacher tous les onglets
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Activer l'onglet sélectionné
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+        }
+        
+        // Copier dans le presse-papier
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ Données copiées dans le presse-papier !');
+            }).catch(err => {
+                console.error('Erreur de copie:', err);
+            });
+        }
+        
+        // Vérifier l'état de l'API au chargement
+        document.addEventListener('DOMContentLoaded', checkAPIStatus);
+    </script>
+</body>
+</html>
